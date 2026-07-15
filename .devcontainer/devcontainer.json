@@ -11,7 +11,7 @@
     "initializeCommand": "docker network create vehicle-network 2>/dev/null || true",
 
     // Runs inside the php container after all services are up
-    "postCreateCommand": "bash .devcontainer/post-create.sh",
+    "postCreateCommand": "sh .devcontainer/post-create.sh",
 
     // Ports forwarded through Codespaces tunnel
     "forwardPorts": [8080, 8081, 3306],

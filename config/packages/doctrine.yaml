@@ -1,7 +1,6 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
-        profiling_abort_on_error: true
         use_savepoints: true
     orm:
         auto_generate_proxy_classes: true

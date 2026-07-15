@@ -1,0 +1,77 @@
+name: vehicle-api
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: vehicle-api-nginx
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+    volumes:
+      - .:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+    networks:
+      - vehicle-network
+
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: vehicle-api-php
+    volumes:
+      - .:/var/www/html
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+    env_file:
+      - .env
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - vehicle-network
+
+  mysql:
+    image: mysql:8.4
+    container_name: vehicle-api-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-vehicle_api}
+      MYSQL_USER: ${MYSQL_USER:-vehicle_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-vehicle_password}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - vehicle-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: vehicle-api-phpmyadmin
+    ports:
+      - "${PMA_PORT:-8081}:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+    depends_on:
+      - mysql
+    networks:
+      - vehicle-network
+
+volumes:
+  mysql_data:
+    name: vehicle-api-mysql-data
+
+networks:
+  vehicle-network:
+    external: true
+    name: vehicle-network

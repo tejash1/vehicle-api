@@ -1,0 +1,7 @@
+framework:
+    serializer:
+        enabled: true
+        # Converts PHP camelCase <-> JSON snake_case automatically.
+        # This affects both #[MapRequestPayload] and #[MapQueryString].
+        # vehicleModelId (PHP) <-> vehicle_model_id (JSON / query string)
+        name_converter: serializer.name_converter.camel_case_to_snake_case

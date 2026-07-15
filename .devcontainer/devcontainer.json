@@ -1,0 +1,55 @@
+{
+    "name": "Vehicle API",
+
+    // Use the existing docker-compose.yml — no duplication
+    "dockerComposeFile": ["../docker-compose.yml"],
+    "service": "php",
+    "workspaceFolder": "/var/www/html",
+
+    // Create the shared Docker network before docker-compose starts.
+    // Runs on the Codespace VM host — the || true prevents failure if it already exists.
+    "initializeCommand": "docker network create vehicle-network 2>/dev/null || true",
+
+    // Runs inside the php container after all services are up
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+    // Ports forwarded through Codespaces tunnel
+    "forwardPorts": [8080, 8081, 3306],
+    "portsAttributes": {
+        "8080": {
+            "label": "Vehicle API",
+            "onAutoForward": "notify",
+            "visibility": "public"
+        },
+        "8081": {
+            "label": "phpMyAdmin",
+            "onAutoForward": "silent",
+            "visibility": "private"
+        },
+        "3306": {
+            "label": "MySQL",
+            "onAutoForward": "silent",
+            "visibility": "private"
+        }
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "xdebug.php-debug",
+                "ms-azuretools.vscode-docker",
+                "eamodio.gitlens",
+                "EditorConfig.EditorConfig"
+            ],
+            "settings": {
+                "php.validate.executablePath": "/usr/local/bin/php",
+                "editor.formatOnSave": true,
+                "files.exclude": {
+                    "vendor": true,
+                    "var": true
+                }
+            }
+        }
+    }
+}
